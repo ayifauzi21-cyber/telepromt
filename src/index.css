@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-app-bg: #0F0F0F;
+  --color-surface: #1A1A1A;
+  --color-accent: #00E676;
+  --color-danger: #FF5252;
+  --color-prompter-yellow: #FFFF00;
+  --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --radius-geometric: 12px;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-app-bg);
+    font-family: var(--font-main);
+    color: white;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "TelePro - Simple Teleprompter",
+  "description": "A simple web-based teleprompter with camera preview, auto-scrolling text, and mobile-friendly controls.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": []
+}
