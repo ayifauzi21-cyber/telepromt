@@ -243,74 +243,72 @@ export default function App() {
         </div>
       </div>
 
-      {/* Top Section: Camera Preview */}
-      <div className="relative w-full h-1/4 sm:h-[280px] landscape:h-1/5 sm:landscape:h-[220px] shrink-0 bg-black rounded-[var(--radius-geometric)] overflow-hidden flex items-center justify-center border-2 border-[var(--color-surface)] shadow-lg">
-        {cameraError ? (
-          <div className="flex flex-col items-center gap-3 p-4 text-center">
-            <div className="text-4xl">⚠️</div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-white font-bold uppercase tracking-wider">Access Blocked or Device Missing</p>
-              <p className="text-xs text-zinc-500 max-w-[280px]">
-                {cameraError.toLowerCase().includes('not found') 
-                  ? "Browser could not 'see' your camera hardware. This is common in iFrames." 
-                  : "Access denied or restricted. Please check your browser settings."}
-              </p>
-              <p className="text-[10px] text-orange-400 font-bold italic">
-                👉 FIX: Click 'OPEN IN NEW TAB' to enable hardware access.
-              </p>
+      {/* Main Content: Camera + Text (Side-by-side on Landscape) */}
+      <div className="flex flex-col flex-1 gap-2 sm:gap-5 landscape:flex-row landscape:gap-1 overflow-hidden">
+        {/* Top Section: Camera Preview (Left on Landscape) */}
+        <div className="relative w-full h-1/4 sm:h-[280px] landscape:h-full landscape:w-1/3 sm:landscape:w-1/4 shrink-0 bg-black rounded-[var(--radius-geometric)] overflow-hidden flex items-center justify-center border-2 border-[var(--color-surface)] shadow-lg">
+          {cameraError ? (
+            <div className="flex flex-col items-center gap-2 p-2 text-center landscape:scale-75">
+              <div className="text-2xl sm:text-4xl">⚠️</div>
+              <div className="space-y-1">
+                <p className="text-[9px] sm:text-[10px] text-white font-bold uppercase tracking-wider">Access Blocked</p>
+                <p className="text-[10px] sm:text-xs text-zinc-500 max-w-[280px] leading-tight">
+                  Open in a **NEW TAB** to enable hardware access.
+                </p>
+              </div>
+              <div className="flex flex-col gap-1 w-full mt-2">
+                <button 
+                  onClick={() => setCameraRetryCount(prev => prev + 1)}
+                  className="px-2 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-[9px] font-bold transition-all"
+                >
+                  RETRY
+                </button>
+                <button 
+                  onClick={() => window.open(window.location.href, '_blank')}
+                  className="px-2 py-2 bg-[var(--color-accent)] text-black rounded-lg text-[9px] font-bold transition-all"
+                >
+                  NEW TAB ↗
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setCameraRetryCount(prev => prev + 1)}
-                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-[10px] font-bold transition-all active:scale-95"
-              >
-                RETRY
-              </button>
-              <button 
-                onClick={() => window.open(window.location.href, '_blank')}
-                className="px-4 py-2 bg-[var(--color-accent)] text-black rounded-lg text-[10px] font-bold transition-all active:scale-95"
-              >
-                OPEN IN NEW TAB ↗
-              </button>
+          ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className={`w-full h-full object-cover transition-transform duration-500 ${isMirrored ? 'scale-x-[-1]' : ''}`}
+              id="camera-preview"
+            />
+          )}
+          {!cameraError && (
+            <div className="absolute top-2 right-2 bg-black/50 px-2 py-0.5 rounded text-[8px] text-white landscape:hidden">
+              LIVE
             </div>
-          </div>
-        ) : (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className={`w-full h-full object-cover transition-transform duration-500 ${isMirrored ? 'scale-x-[-1]' : ''}`}
-            id="camera-preview"
-          />
-        )}
-        {!cameraError && (
-          <div className="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded text-[10px] text-white">
-            1920x1080 • 30fps
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Middle Section: Prompter Text Area */}
-      <div className="relative flex-1 bg-[var(--color-surface)] rounded-[var(--radius-geometric)] overflow-hidden flex flex-col border-2 border-[#333]">
-        {/* Focus Marker */}
-        <div className="absolute top-1/2 left-0 right-0 h-[60px] sm:h-[80px] -mt-[30px] sm:-mt-[40px] bg-white/[0.03] border-t border-white/10 border-b border-white/10 pointer-events-none z-10" />
-        
-        <div 
-          ref={scrollContainerRef}
-          className={`flex-1 overflow-y-auto px-4 sm:px-10 py-[45vh] ${isMirrored ? 'scale-x-[-1]' : ''}`}
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <style>{`.flex-1::-webkit-scrollbar { display: none; }`}</style>
+        {/* Middle Section: Prompter Text Area (Right on Landscape) */}
+        <div className="relative flex-1 bg-[var(--color-surface)] rounded-[var(--radius-geometric)] overflow-hidden flex flex-col border-2 border-[#333]">
+          {/* Focus Marker */}
+          <div className="absolute top-1/2 left-0 right-0 h-[60px] sm:h-[80px] -mt-[30px] sm:-mt-[40px] bg-white/[0.03] border-t border-white/10 border-b border-white/10 pointer-events-none z-10" />
+          
           <div 
-            className="max-w-3xl mx-auto text-center"
-            style={{ fontSize: `${fontSize}px`, lineHeight: '1.5' }}
+            ref={scrollContainerRef}
+            className={`flex-1 overflow-y-auto px-4 sm:px-10 py-[45vh] ${isMirrored ? 'scale-x-[-1]' : ''}`}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            <p className="whitespace-pre-wrap font-bold text-[var(--color-prompter-yellow)] transition-all duration-300 drop-shadow-sm">
-              {text}
-            </p>
-            {/* Added buffer at bottom to allow scrolling past last line */}
-            <div className="h-[80vh]" />
+            <style>{`.flex-1::-webkit-scrollbar { display: none; }`}</style>
+            <div 
+              className="max-w-3xl mx-auto text-center"
+              style={{ fontSize: `${fontSize}px`, lineHeight: '1.5' }}
+            >
+              <p className="whitespace-pre-wrap font-bold text-[var(--color-prompter-yellow)] transition-all duration-300 drop-shadow-sm">
+                {text}
+              </p>
+              {/* Added buffer at bottom to allow scrolling past last line */}
+              <div className="h-[80vh]" />
+            </div>
           </div>
         </div>
       </div>
