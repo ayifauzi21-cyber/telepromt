@@ -59,7 +59,8 @@ export default function App() {
       { video: { facingMode: 'user' }, audio: true },
       { video: { facingMode: 'user' }, audio: false },
       { video: true, audio: true },
-      { video: true, audio: false }
+      { video: true, audio: false },
+      { video: { width: { ideal: 640 }, height: { ideal: 480 } } } // Minimalist constraint
     ];
 
     let stream: MediaStream | null = null;
@@ -101,21 +102,26 @@ export default function App() {
         lastTimeRef.current = time;
       }
       const deltaTime = (time - lastTimeRef.current) / 1000;
-      scrollPosRef.current += scrollSpeed * deltaTime;
+      
+      // Ensure deltaTime isn't huge (e.g. after tab was backgrounded)
+      const clampedDelta = Math.min(deltaTime, 0.1);
+      
+      scrollPosRef.current += scrollSpeed * clampedDelta;
       
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = scrollPosRef.current;
         
-        // Stop if it goes way past
-        if (scrollPosRef.current > scrollContainerRef.current.scrollHeight + (window.innerHeight / 2)) {
+        // Stop if it goes way past the content
+        if (scrollPosRef.current > scrollContainerRef.current.scrollHeight) {
           setIsPlaying(false);
           scrollPosRef.current = 0;
         }
       }
+      lastTimeRef.current = time;
     } else {
       lastTimeRef.current = 0;
     }
-    lastTimeRef.current = time;
+    
     requestRef.current = requestAnimationFrame(animateScroll);
   }, [isPlaying, scrollSpeed]);
 
@@ -218,19 +224,27 @@ export default function App() {
           <div className="flex flex-col items-center gap-3 p-4 text-center">
             <div className="text-4xl">⚠️</div>
             <div className="space-y-1">
-              <p className="text-[10px] text-white font-bold uppercase tracking-wider">Connection Error</p>
-              <p className="text-xs text-zinc-500 max-w-[220px]">
+              <p className="text-[10px] text-white font-bold uppercase tracking-wider">Camera/Mic Blocked</p>
+              <p className="text-xs text-zinc-500 max-w-[240px]">
                 {cameraError.toLowerCase().includes('not found') 
-                  ? "Camera device not found. Please connect a webcam." 
-                  : "Camera access is restricted. Try opening in a new tab."}
+                  ? "Hardware not detected. If you're on a phone, try opening this app in a NEW TAB." 
+                  : "Access denied. Please check browser permissions or open in a new tab."}
               </p>
             </div>
-            <button 
-              onClick={() => setCameraRetryCount(prev => prev + 1)}
-              className="mt-2 px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-full text-[10px] font-bold transition-all active:scale-95"
-            >
-              RETRY CAMERA
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setCameraRetryCount(prev => prev + 1)}
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-[10px] font-bold transition-all active:scale-95"
+              >
+                RETRY
+              </button>
+              <button 
+                onClick={() => window.open(window.location.href, '_blank')}
+                className="px-4 py-2 bg-[var(--color-accent)] text-black rounded-lg text-[10px] font-bold transition-all active:scale-95"
+              >
+                OPEN IN NEW TAB ↗
+              </button>
+            </div>
           </div>
         ) : (
           <video
@@ -256,7 +270,7 @@ export default function App() {
         
         <div 
           ref={scrollContainerRef}
-          className={`flex-1 overflow-y-auto px-4 sm:px-10 py-[45vh] scroll-smooth ${isMirrored ? 'scale-x-[-1]' : ''}`}
+          className={`flex-1 overflow-y-auto px-4 sm:px-10 py-[45vh] ${isMirrored ? 'scale-x-[-1]' : ''}`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <style>{`.flex-1::-webkit-scrollbar { display: none; }`}</style>
