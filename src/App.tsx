@@ -55,24 +55,49 @@ export default function App() {
       videoRef.current.srcObject = null;
     }
 
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError("Your browser doesn't support camera access or it's blocked by iFrame.");
+      return;
+    }
+
+    // Try standard constraints first
     const constraintsList = [
       { video: { facingMode: 'user' }, audio: true },
       { video: { facingMode: 'user' }, audio: false },
       { video: true, audio: true },
       { video: true, audio: false },
-      { video: { width: { ideal: 640 }, height: { ideal: 480 } } } // Minimalist constraint
+      { video: { width: { ideal: 640 }, height: { ideal: 480 } } },
+      { video: true }
     ];
 
     let stream: MediaStream | null = null;
     let lastError: any = null;
 
+    // 1. Try iterating through constraints
     for (const constraint of constraintsList) {
       try {
         stream = await navigator.mediaDevices.getUserMedia(constraint);
         if (stream) break;
       } catch (err) {
         lastError = err;
-        console.warn("Retrying with different constraints...", err);
+        console.warn("Constraint attempt failed:", constraint, err);
+      }
+    }
+
+    // 2. If it still fails, try listing devices and picking the first video input
+    if (!stream) {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        
+        if (videoDevices.length > 0) {
+          console.log("Picking first available camera ID:", videoDevices[0].deviceId);
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { deviceId: videoDevices[0].deviceId } 
+          });
+        }
+      } catch (err) {
+        lastError = err;
       }
     }
 
@@ -224,11 +249,14 @@ export default function App() {
           <div className="flex flex-col items-center gap-3 p-4 text-center">
             <div className="text-4xl">⚠️</div>
             <div className="space-y-1">
-              <p className="text-[10px] text-white font-bold uppercase tracking-wider">Camera/Mic Blocked</p>
-              <p className="text-xs text-zinc-500 max-w-[240px]">
+              <p className="text-[10px] text-white font-bold uppercase tracking-wider">Access Blocked or Device Missing</p>
+              <p className="text-xs text-zinc-500 max-w-[280px]">
                 {cameraError.toLowerCase().includes('not found') 
-                  ? "Hardware not detected. If you're on a phone, try opening this app in a NEW TAB." 
-                  : "Access denied. Please check browser permissions or open in a new tab."}
+                  ? "Browser could not 'see' your camera hardware. This is common in iFrames." 
+                  : "Access denied or restricted. Please check your browser settings."}
+              </p>
+              <p className="text-[10px] text-orange-400 font-bold italic">
+                👉 FIX: Click 'OPEN IN NEW TAB' to enable hardware access.
               </p>
             </div>
             <div className="flex gap-2">
@@ -445,32 +473,64 @@ export default function App() {
       <AnimatePresence>
         {recordedVideoUrl && (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm"
           >
-            <div className="bg-[var(--color-surface)] border-2 border-[#333] p-6 rounded-[var(--radius-geometric)] shadow-2xl max-w-sm w-full text-center space-y-4">
-              <div className="w-16 h-16 bg-[var(--color-accent)]/20 text-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto">
-                <Video size={32} />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-[var(--color-surface)] border-2 border-[#333] p-5 sm:p-7 rounded-[var(--radius-geometric)] shadow-2xl max-w-2xl w-full space-y-5"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[var(--color-accent)]/20 text-[var(--color-accent)] rounded-xl flex items-center justify-center">
+                    <Video size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold leading-tight">Recording Finished</h3>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Review your take below</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setRecordedVideoUrl(null)}
+                  className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
               </div>
-              <h3 className="text-xl font-bold">Recording Finished</h3>
-              <p className="text-sm text-zinc-400">Your video is ready to download.</p>
-              <div className="flex flex-col gap-3">
+
+              {/* Video Preview Player */}
+              <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-white/5 shadow-inner">
+                <video 
+                  src={recordedVideoUrl} 
+                  controls 
+                  className="w-full h-full object-contain"
+                  autoPlay
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button 
                   onClick={downloadVideo}
-                  className="w-full py-3 bg-[var(--color-accent)] text-black rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                  className="py-4 bg-[var(--color-accent)] text-black rounded-xl font-black flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(0,230,118,0.2)]"
                 >
-                  <Download size={18} /> DOWNLOAD VIDEO
+                  <Download size={20} /> DOWNLOAD VIDEO
                 </button>
                 <button 
                   onClick={() => setRecordedVideoUrl(null)}
-                  className="w-full py-3 bg-zinc-800 text-white rounded-xl font-bold hover:bg-zinc-700 transition-colors"
+                  className="py-4 bg-zinc-800 text-white rounded-xl font-bold hover:bg-zinc-700 transition-colors active:scale-95"
                 >
-                  DISMISS
+                  DISCARD & CLOSE
                 </button>
               </div>
-            </div>
+              
+              <p className="text-[9px] text-center text-zinc-600 italic">
+                Note: Standard .webm format. Use VLC or Chrome for playback if downloaded to PC.
+              </p>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
