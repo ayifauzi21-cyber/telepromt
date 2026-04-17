@@ -232,9 +232,9 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-[var(--color-app-bg)] text-white font-sans overflow-hidden p-3 sm:p-5 gap-3 sm:gap-5">
+    <div className="flex flex-col h-screen max-h-screen bg-[var(--color-app-bg)] text-white font-sans overflow-hidden p-2 sm:p-5 gap-2 sm:gap-5 landscape:p-1 landscape:gap-1">
       {/* Top Header */}
-      <div className="flex justify-between items-center h-8 sm:h-10 shrink-0">
+      <div className="flex justify-between items-center h-8 sm:h-10 shrink-0 landscape:hidden sm:landscape:flex">
         <div className="font-extrabold text-base sm:text-lg uppercase tracking-tight">
           TELEPRO<span className="text-[var(--color-accent)]">MPTER</span>
         </div>
@@ -244,7 +244,7 @@ export default function App() {
       </div>
 
       {/* Top Section: Camera Preview */}
-      <div className="relative w-full h-1/4 sm:h-[280px] shrink-0 bg-black rounded-[var(--radius-geometric)] overflow-hidden flex items-center justify-center border-2 border-[var(--color-surface)] shadow-lg">
+      <div className="relative w-full h-1/4 sm:h-[280px] landscape:h-1/5 sm:landscape:h-[220px] shrink-0 bg-black rounded-[var(--radius-geometric)] overflow-hidden flex items-center justify-center border-2 border-[var(--color-surface)] shadow-lg">
         {cameraError ? (
           <div className="flex flex-col items-center gap-3 p-4 text-center">
             <div className="text-4xl">⚠️</div>
@@ -316,39 +316,39 @@ export default function App() {
       </div>
 
       {/* Bottom Section: Controls */}
-      <div className="bg-[var(--color-surface)] border border-[#333] rounded-[var(--radius-geometric)] px-3 sm:px-5 py-3 sm:py-0 min-h-[130px] sm:h-[100px] shrink-0 flex flex-col justify-center">
-        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_3fr_1fr] items-center gap-3 sm:gap-4">
+      <div className="bg-[var(--color-surface)] border border-[#333] rounded-[var(--radius-geometric)] px-3 sm:px-5 py-2 sm:py-0 min-h-[120px] landscape:min-h-[80px] sm:h-[100px] shrink-0 flex flex-col justify-center">
+        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_3fr_1fr] items-center gap-2 sm:gap-4 landscape:gap-1">
           
           {/* Main Controls: Buttons */}
           <div className="order-2 sm:order-2 w-full sm:w-auto">
-            <div className="grid grid-cols-4 gap-2 mb-3 sm:hidden">
+            <div className="grid grid-cols-4 gap-2 mb-2 sm:mb-3 sm:hidden landscape:mb-1">
               <button 
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`p-3 rounded-xl font-bold flex items-center justify-center transition-all ${isRecording ? 'bg-orange-500 text-white animate-pulse' : 'bg-white/10 text-white border border-white/5'}`}
+                className={`p-2 sm:p-3 rounded-xl font-bold flex items-center justify-center transition-all ${isRecording ? 'bg-orange-500 text-white animate-pulse' : 'bg-white/10 text-white border border-white/5'}`}
                 title="Record"
               >
-                {isRecording ? <StopCircle size={20} /> : <Video size={20} />}
+                {isRecording ? <StopCircle size={18} /> : <Video size={18} />}
               </button>
               <button 
                 onClick={handleSave}
-                className="p-3 rounded-xl border border-[#444] text-white font-semibold flex items-center justify-center hover:bg-[#252525] transition-all"
+                className="p-2 sm:p-3 rounded-xl border border-[#444] text-white font-semibold flex items-center justify-center hover:bg-[#252525] transition-all"
                 title="Save"
               >
-                <Save size={20} />
+                <Save size={18} />
               </button>
               <button 
                 onClick={handleReset}
-                className="p-3 rounded-xl border border-[#444] text-white font-semibold flex items-center justify-center hover:bg-[#252525] transition-all"
+                className="p-2 sm:p-3 rounded-xl border border-[#444] text-white font-semibold flex items-center justify-center hover:bg-[#252525] transition-all"
                 title="Repeat"
               >
-                <RotateCcw size={20} />
+                <RotateCcw size={18} />
               </button>
               <button 
                 onClick={() => setShowEditor(true)}
-                className="p-3 rounded-xl border border-[#444] text-white font-semibold flex items-center justify-center hover:bg-[#252525] transition-all"
+                className="p-2 sm:p-3 rounded-xl border border-[#444] text-white font-semibold flex items-center justify-center hover:bg-[#252525] transition-all"
                 title="Input"
               >
-                <Type size={20} />
+                <Type size={18} />
               </button>
             </div>
             
@@ -356,10 +356,10 @@ export default function App() {
               {/* This Start button will be full-width on mobile below the icons */}
               <button 
                 onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex-1 sm:flex-none py-4 sm:px-12 sm:py-3 rounded-xl sm:rounded-lg font-black flex items-center justify-center gap-3 transition-all uppercase text-sm sm:text-base ${isPlaying ? 'bg-[var(--color-danger)] text-white shadow-[0_0_20px_rgba(255,82,82,0.4)]' : 'bg-[var(--color-accent)] text-black shadow-[0_0_20px_rgba(0,230,118,0.4)]'}`}
+                className={`flex-1 sm:flex-none py-3 sm:px-12 sm:py-3 rounded-xl sm:rounded-lg font-black flex items-center justify-center gap-3 transition-all uppercase text-sm sm:text-base landscape:py-2 ${isPlaying ? 'bg-[var(--color-danger)] text-white shadow-[0_0_20px_rgba(255,82,82,0.4)]' : 'bg-[var(--color-accent)] text-black shadow-[0_0_20px_rgba(0,230,118,0.4)]'}`}
                 id="btn-play-pause"
               >
-                {isPlaying ? <><Pause size={24} fill="currentColor" /> STOP</> : <><Play size={24} fill="currentColor" /> START</>}
+                {isPlaying ? <><Pause size={20} sm:size={24} fill="currentColor" /> STOP</> : <><Play size={20} sm:size={24} fill="currentColor" /> START</>}
               </button>
 
               {/* Desktop-only Record button (already handled by hidden sm:flex above, but I need to keep the structure clear) */}
@@ -395,8 +395,8 @@ export default function App() {
           </div>
 
           {/* Info and Settings: Ranges */}
-          <div className="flex order-1 sm:order-1 items-center justify-between w-full sm:w-auto text-[10px] sm:text-[12px] text-[#888] gap-4">
-            <div className="flex-1 flex items-center gap-2 bg-black/20 p-2 rounded-lg">
+          <div className="flex order-1 sm:order-1 items-center justify-between w-full sm:w-auto text-[10px] sm:text-[12px] text-[#888] gap-4 landscape:gap-2">
+            <div className="flex-1 flex items-center gap-2 bg-black/20 p-1.5 sm:p-2 rounded-lg">
               <span className="uppercase font-mono shrink-0">Speed</span>
               <input 
                 type="range" 
@@ -407,13 +407,13 @@ export default function App() {
                 className="w-full accent-[var(--color-accent)]"
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
                <span className="sm:hidden">{fontSize}px</span>
                <button 
                 onClick={() => setShowSettings(!showSettings)}
-                className={`p-2 rounded-lg border border-[#444] text-white transition-all ${showSettings ? 'bg-[#333] border-[var(--color-accent)]' : ''}`}
+                className={`p-1.5 sm:p-2 rounded-lg border border-[#444] text-white transition-all ${showSettings ? 'bg-[#333] border-[var(--color-accent)]' : ''}`}
               >
-                <SettingsIcon size={16} />
+                <SettingsIcon size={14} sm:size={16} />
               </button>
             </div>
             <div className="hidden sm:block">Text Size: {fontSize}px</div>
